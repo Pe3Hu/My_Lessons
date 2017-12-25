@@ -1,10 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>My first three.js app</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
 </head>
 <body>
-$END$
+<script src="../libraries/three.js-r87/build/three.min.js"></script>
+<script>
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    var Zoom = 10;
+    camera.position.z = Zoom;
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+
+    var material = new THREE.MeshStandardMaterial( { color : 0x00cc00 } );
+
+    //create a triangular geometry
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push( new THREE.Vector3( -50, -50, 0 ) );
+    geometry.vertices.push( new THREE.Vector3(  50, -50, 0 ) );
+    geometry.vertices.push( new THREE.Vector3(  50,  50, 0 ) );
+
+    //create a new face using vertices 0, 1, 2
+    var normal = new THREE.Vector3( 0, 1, 0 ); //optional
+    var color = new THREE.Color( 0xffaa00 ); //optional
+    var materialIndex = 0; //optional
+    var face = new THREE.Face3( 0, 1, 2, normal, color, materialIndex );
+
+    //add the face to the geometry's faces array
+    geometry.faces.push( face );
+
+    //the face normals and vertex normals can be calculated automatically if not supplied above
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+
+    scene.add( new THREE.Mesh( geometry, material ) );
+
+    var animate = function () {
+        requestAnimationFrame( animate );
+
+        renderer.render(scene, camera);
+    };
+
+    animate();
+</script>
 </body>
-</html>
