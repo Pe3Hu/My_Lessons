@@ -9,33 +9,36 @@
 </head>
 <body>
 <script src="../libraries/three.js-r87/build/three.min.js"></script>
+<script src="../libraries/three.js-r87/src/helpers/AxisHelper.js"> </script>
+
 <script>
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    camera.position.z = 300;
+    var Scene = new THREE.Scene();
+    var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    Camera.position.set(30, 30, 30);
 
 
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
+    var Renderer = new THREE.WebGLRenderer();
+    Renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( Renderer.domElement );
 
-    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var material = new THREE.MeshBasicMaterial( { color: 0xDC143C  } );
+    var Geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var Material = new THREE.MeshBasicMaterial( { color: 0xDC143C  } );
 
     //Массив кубов
-    var cubes = new Matrix3(), n = 30, m = 10;
+    var Cubes = [[]], n = 30, m = 10, k =0;
+
     for (var i=0; i<n; i++){
-        var row_cubes = new [];
+        Cubes.push([]);
         for (var j=0; j<m; j++){
-            row_cubes.push(new THREE.Mesh(geometry, material));
-            row_cubes[j].position.z = -n/2 + j;
-            scene.add(cubes[j]);
+            Cubes[i].push(new THREE.Mesh(Geometry, Material));
+            Cubes[i][j].position.x = -m/2 + j;
+            Cubes[i][j].position.y = -n/2 + i;
+            Scene.add(Cubes[i][j]);
         }
-        cubes.push(row_cubes);
     }
 
     //Длина окружности
-    var l = cubes[cubes.length-1].position.x - cubes[0].position.x, k = 0;
+    //var l = Cubes[cubes.length-1].position.x - Cubes[0].position.x, k = 0;
 
     var animate = function () {
         requestAnimationFrame( animate );
@@ -43,16 +46,14 @@
         //График sin
         for (var i=0; i<n; i++)
             for (var j=0; j<m; j++){
-                cubes[i][j].scale.y = 2+Math.sin (360/cubes.length*i+k);
-                cubes[i][j].position.y = Math.sin (360/cubes.length*i+k)/2;
-
-
+                Cubes[i][j].scale.y = 2+Math.sin (360/Cubes.length*i+k);
+                Cubes[i][j].position.y = Math.sin (360/Cubes.length*i+k)/2;
             }
         //Возможность вращения
         //cube.rotation.x += 0.1;
         //cube.rotation.y += 0.1;
 
-        renderer.render(scene, camera);
+        Renderer.render(Scene, Camera);
     };
 
     animate();

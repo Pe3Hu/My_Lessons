@@ -11,19 +11,39 @@
 <script>
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    camera.position.z = 50;
+   // camera.position.x = 20;
+    camera.position.set (20, 20 , 20);
+camera.lookAt(new THREE.Vector3(0,0,0));
+
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
+
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    var material = new THREE.MeshBasicMaterial( {vertexColors: THREE.FaceColors } );
+
+
     //Массив кубов
-    var cubes = [] , n = 80;
+    var cubes = [] , n = 60;
     for (var i=0; i<n; i++) {
         cubes.push(new THREE.Mesh(geometry, material));
         cubes[i].position.x = -n/2 + i;
+        for (var j=0; j<6; j++){
+            var color1 = new THREE.Color();
+            color1.setRGB(Math.random(), Math.random(),Math.random());
+            cubes[i].geometry.faces[2*j].color     = color1;
+            cubes[i].geometry.faces[2*j+1].color = color1 ;
+
+
+        }
+
+
+        cubes[i].geometry.colorsNeedUpdate = true;
+        cubes[i].material.needsUpdate = true;
         scene.add(cubes[i]);
     }
+
+
     //Длина окружности
     var l = cubes[cubes.length-1].position.x - cubes[0].position.x, k = 0;
     var animate = function () {
