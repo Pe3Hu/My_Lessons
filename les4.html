@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My first three.js app</title>
+    <title>My first Three.js lesson</title>
     <style>
         body { margin: 0; }
         canvas { width: 100%; height: 100% }
@@ -12,38 +12,41 @@
 <script>
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    var Zoom = 10;
-    camera.position.z = Zoom;
+camera.position.set (0, 0 , 20); //(20, 20 , 20);
+    camera.lookAt(new THREE.Vector3(0,0,0));
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    var material = new THREE.MeshStandardMaterial( { color : 0x00cc00 } );
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 
-    //create a triangular geometry
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push( new THREE.Vector3( -50, -50, 0 ) );
-    geometry.vertices.push( new THREE.Vector3(  50, -50, 0 ) );
-    geometry.vertices.push( new THREE.Vector3(  50,  50, 0 ) );
-
-    //create a new face using vertices 0, 1, 2
-    var normal = new THREE.Vector3( 0, 1, 0 ); //optional
-    var color = new THREE.Color( 0xffaa00 ); //optional
-    var materialIndex = 0; //optional
-    var face = new THREE.Face3( 0, 1, 2, normal, color, materialIndex );
-
-    //add the face to the geometry's faces array
-    geometry.faces.push( face );
-
-    //the face normals and vertex normals can be calculated automatically if not supplied above
-    geometry.computeFaceNormals();
-    geometry.computeVertexNormals();
-
-    scene.add( new THREE.Mesh( geometry, material ) );
+    //Массив кубов
+    var cubes = [], n= 12, $ = {
+        radius : 10,
+        speed : 0.1
+    };
+    for (var i=0; i<n; i++) {
+        cubes.push(new THREE.Mesh(geometry, material));
+        //cubes[i].position.x = -9 + i*2;
+        scene.add(cubes[i]);
+    }
+    //Длина окружности
+    var l = cubes[cubes.length-1].position.x - cubes[0].position.x, s = 2*Math.Pi /180, angle = 0;
 
     var animate = function () {
         requestAnimationFrame( animate );
+        //angle+=s;
+        //График sin
+        for (var i=0; i<2; i++){
+            cubes[i].position.y = Math.sin (Math.Pi/6*i)*$.radius/2;
+            cubes[i].position.x = Math.cos (Math.Pi/6*i)*$.radius/2;
+
+        }
+        //Возможность вращения
+        //cube.rotation.x += 0.1;
+        //cube.rotation.y += 0.1;
 
         renderer.render(scene, camera);
     };
