@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wave on cube side. 3 lesson Three.js</title>
+    <title>Diagonal wave on cube side. 5 lesson Three.js</title>
     <style>
         body { margin: 0; }
         canvas { width: 100%; height: 100% }
@@ -14,7 +14,8 @@
     //<script src="../libraries/three.js-r87/src/helpers/AxisHelper.js">
     var Scene = new THREE.Scene();
     var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    Camera.position.set(40, 20, 20);
+    var air_gap = 20;
+    Camera.position.set(4*air_gap, 2*air_gap, 2*air_gap);
     Camera.lookAt(new THREE.Vector3(0,0,0));
 
 
@@ -32,8 +33,9 @@
         Cubes.push([]);
         for (var j=0; j<m; j++){
             Cubes[i].push(new THREE.Mesh(Geometry, Material));
-            Cubes[i][j].position.x = -m/2 + j;
-            Cubes[i][j].position.z = -n/2 + i;
+            Cubes[i][j].position.x = -air_gap;
+            Cubes[i][j].position.z = -m/2 + j;
+            Cubes[i][j].position.y = -n/2 + i;
             for (var j1=0; j1<6; j1++){
                 var color1 = new THREE.Color();
                 color1.setRGB(Math.random(), Math.random(),Math.random());
@@ -54,9 +56,12 @@
         //Анимация волн
         for (var i=0; i<n; i++)
             for (var j=0; j<m; j++){
-                Cubes[i][j].scale.y = 4+Math.sin (360/Cubes.length*i+k);
-                Cubes[i][j].position.y = Math.sin (360/Cubes.length*i+k)/2;
+                Cubes[i][j].scale.x = 4+Math.sin (360/Cubes.length*i+360/Cubes.length*j+k);
+                Cubes[i][j].position.x = Math.sin (360/Cubes.length*i+360/Cubes.length*j+k)/2;
             }
+        //Возможность вращения
+        //cube.rotation.x += 0.1;
+        //cube.rotation.y += 0.1;
 
         Renderer.render(Scene, Camera);
     };

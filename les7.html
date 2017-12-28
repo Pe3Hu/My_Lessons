@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Keys. 7 lesson Three.js </title>
+</head>
+<body>
+<p>Страница по нажатию V офиолетивает.</p>
+<script>
+    addEventListener("keydown", function(event) {
+        if (event.keyCode == 86)
+            document.body.style.background = "violet";
+    });
+    addEventListener("keyup", function(event) {
+        if (event.keyCode == 86)
+            document.body.style.background = "";
+    });
+</script>
+</body>
+</html>

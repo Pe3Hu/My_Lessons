@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My first Three.js lesson</title>
+    <title>Cirle. 4 lesson Three.js</title>
     <style>
         body { margin: 0; }
         canvas { width: 100%; height: 100% }
@@ -24,30 +24,28 @@ camera.position.set (0, 0 , 20); //(20, 20 , 20);
 
     //Массив кубов
     var cubes = [], n= 12, $ = {
-        radius : 10,
+        radius : 1,
         speed : 0.1
     };
     for (var i=0; i<n; i++) {
         cubes.push(new THREE.Mesh(geometry, material));
-        //cubes[i].position.x = -9 + i*2;
+        cubes[i].position.x = Math.sin (2*Math.PI/n*i)*$.radius/2;
+        cubes[i].position.y = Math.cos (2*Math.PI/n*i)*$.radius/2;
         scene.add(cubes[i]);
     }
     //Длина окружности
-    var l = cubes[cubes.length-1].position.x - cubes[0].position.x, s = 2*Math.Pi /180, angle = 0;
+    var l = cubes[cubes.length-1].position.x - cubes[0].position.x, s = 2*Math.PI /180, angle = 0;
 
     var animate = function () {
         requestAnimationFrame( animate );
-        //angle+=s;
-        //График sin
-        for (var i=0; i<2; i++){
-            cubes[i].position.y = Math.sin (Math.Pi/6*i)*$.radius/2;
-            cubes[i].position.x = Math.cos (Math.Pi/6*i)*$.radius/2;
+        angle+=s;
+        $.radius+=0.1;
+        //График Окружности
+        for (var i=0; i<n; i++){
+            cubes[i].position.y = Math.sin (Math.PI/6*i+angle)*$.radius/2;
+            cubes[i].position.x = Math.cos (Math.PI/6*i+angle)*$.radius/2;
 
         }
-        //Возможность вращения
-        //cube.rotation.x += 0.1;
-        //cube.rotation.y += 0.1;
-
         renderer.render(scene, camera);
     };
 
