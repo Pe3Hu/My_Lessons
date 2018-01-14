@@ -1,20 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Keys. 7 lesson Three.js </title>
+<title>Movement From Point To Point. 7 lesson Three.js </title>
 </head>
 <body>
-<p>Страница по нажатию V офиолетивает.</p>
+
+<script src="../libraries/three.js-r87/build/three.js"></script>
+<script src="../libraries/three.js-r87/examples/js/geometries/hilbert3D.js"></script>
+<script src="../libraries/three.js-r87/examples/js/shaders/ConvolutionShader.js"></script>
+<script src="../libraries/three.js-r87/examples/js/shaders/CopyShader.js"></script>
+<script src="../libraries/three.js-r87/examples/js/shaders/FXAAShader.js"></script>
+<script src="../libraries/three.js-r87/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="../libraries/three.js-r87/examples/js/postprocessing/MaskPass.js"></script>
+<script src="../libraries/three.js-r87/examples/js/postprocessing/RenderPass.js"></script>
+<script src="../libraries/three.js-r87/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="../libraries/three.js-r87/examples/js/postprocessing/BloomPass.js"></script>
+<script src="../libraries/three.js-r87/examples/js/Detector.js"></script>
+<script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
 <script>
-    addEventListener("keydown", function(event) {
-        if (event.keyCode == 86)
-            document.body.style.background = "violet";
-    });
-    addEventListener("keyup", function(event) {
-        if (event.keyCode == 86)
-            document.body.style.background = "";
-    });
+    
+   function controlSphereMoving()
+    {
+        SphereMesh.position.add(PointsAndDirectionsArray[ControlInfo.CurrentPointAndDirectionIndex]["Direction"]);
+        LenVector.copy(PointsAndDirectionsArray[ControlInfo.TargetPointAndDirectionIndex]["PointMesh"].position);
+//      Camera.position.copy(SphereMesh.position);
+//      Camera.position.addScalar(200, 200, 0);
+        //Camera.lookAt(PointsAndDirectionsArray[ControlInfo.TargetPointAndDirectionIndex]["PointMesh"].position);
+        LenVector.sub(SphereMesh.position);
+        if(LenVector.length() < 2)
+        {
+            SphereMesh.position.copy(PointsAndDirectionsArray[ControlInfo.TargetPointAndDirectionIndex]["PointMesh"].position);
+            ControlInfo.CurrentPointAndDirectionIndex = ControlInfo.TargetPointAndDirectionIndex;
+            if(ControlInfo.TargetPointAndDirectionIndex === PointsAndDirectionsArray.length-1)
+                ControlInfo.TargetPointAndDirectionIndex = 0;
+            else
+                ControlInfo.TargetPointAndDirectionIndex++;
+            InfoDiv.innerText = "Moving: " + ControlInfo.CurrentPointAndDirectionIndex + " => " + ControlInfo.TargetPointAndDirectionIndex + " .";
+        }
+    };
+    var InfoDiv = document.createElement("div");
+    InfoDiv.style.position = "absolute";
+    InfoDiv.style.left = "50px";
+    InfoDiv.style.top = "50px";
+    InfoDiv.innerText =  "Moving: 0 => 1 .";
+    InfoDiv.style.zIndex = "10";
+    document.body.appendChild(InfoDiv);
+
+    var LenVector = new THREE.Vector3();
+    var ControlInfo = {
+        CurrentPointAndDirectionIndex: 0,
+        TargetPointAndDirectionIndex: 1
+    };
+    var PointAndDirection = {
+        PointMesh: null,
+        Direction: null 
+    };
+    var Container = document.createElement("div");
+    Container.style.height = window.innerHeight;
+    Container.style.width = window.innerWidth;
+    document.body.appendChild(Container);
+    var Renderer = new THREE.WebGLRenderer();
+    Renderer.setSize(window.innerWidth, window.innerHeight);
+    Container.appendChild(Renderer.domElement);
+    var Scene = new THREE.Scene();
+    var Camera = new THREE.PerspectiveCamera( 33, window.innerWidth / window.innerHeight, 1, 10000 );
+
+    // var Controls = new THREE.OrbitControls( Camera );
+    //Camera.position.set( 0, 20, 100 );
+    //Controls.update();
+    var Geometry = new THREE.SphereGeometry(30, 2, 2);
+    var Material = new THREE.MeshBasicMaterial({color: 0xff00ff});
+    var SphereMesh = new THREE.Mesh(Geometry, Material);
+    var Room = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(1000, 1000, 1000), 
+        new THREE.MeshBasicMaterial({color :0xffffce, side: THREE.DoubleSide})
+    );
+
+    var HilbertGeometry = new THREE.Geometry(), Colors = [],
+        Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 ),
+        Points2 = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 0, 0, 1, 2, 3, 4, 5, 6, 7 );
+    for ( i = 0; i < Points.length; i ++ ) {
+        HilbertGeometry.vertices.push( Points[ i ] );
+        Colors[ i ] = new THREE.Color( 0xffffff );
+        //Colors[ i ].setHSL( 0.6, 1.0, Math.max( 0, ( 200 - Points[ i ].x ) / 400 ) * 0.5 + 0.5 );
+        Colors[ i ].setHSL( i / Points.length, 1.0, 0.5 );
+    }
+    HilbertGeometry.colors = Colors;
+    // lines
+    Material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
+    var Line, scale = 0.3, d = 225;
+    var Parameters = [ Material, scale*2.5, [0,0,0],  HilbertGeometry ];
+    Line = new THREE.Line( Parameters[ 3 ],  Parameters[ 0 ] );
+    Line.scale.x = Line.scale.y = Line.scale.z =  Parameters[ 1 ];
+    Line.position.x = Parameters[ 2 ][ 0 ];
+    Line.position.y = Parameters[ 2 ][ 1 ];
+    Line.position.z = Parameters[ 2 ][ 2 ];
+    Scene.add( Line );                    
+
+    var PointsAndDirectionsArray = [];
+    for (var i=0; i<Points2.length; i++)
+    {
+        var Point = new THREE.Mesh(
+            new THREE.SphereGeometry(10, 32, 32),
+            new THREE.MeshBasicMaterial({color: 0x2194ce})
+        );
+        var [x,y,z] = [Points2[ i ].getComponent ( 0 ) , 
+                       Points2[ i ].getComponent ( 1 ) , 
+                       Points2[ i ].getComponent ( 2 ) , 
+                      ];
+        Point.position.set(x,y,z);
+        Scene.add(Point);
+        var pad = {};
+        /*Copying object PointAndDirection to pad*/
+        Object.assign(pad, PointAndDirection);
+        PointsAndDirectionsArray.push(pad);
+        PointsAndDirectionsArray[i].PointMesh = Point;
+    }
+    for(var i=0; i<PointsAndDirectionsArray.length; i++)
+    {
+        if(i === PointsAndDirectionsArray.length-1)
+        {
+            PointsAndDirectionsArray[i]["Direction"] = PointsAndDirectionsArray[0]["PointMesh"].position.clone();
+            PointsAndDirectionsArray[i]["Direction"].sub(PointsAndDirectionsArray[i]["PointMesh"].position);
+            PointsAndDirectionsArray[i]["Direction"].normalize();
+            break;
+        } else
+        {
+            PointsAndDirectionsArray[i]["Direction"] = PointsAndDirectionsArray[i+1]["PointMesh"].position.clone();
+            PointsAndDirectionsArray[i]["Direction"].sub(PointsAndDirectionsArray[i]["PointMesh"].position);
+            PointsAndDirectionsArray[i]["Direction"].normalize();           
+        }
+    };
+    Scene.add(Room);
+    Scene.add(SphereMesh);
+    Scene.add(Camera);
+    Camera.position.set(0,0, 200);
+    var updatableFuncs = [controlSphereMoving];
+    SphereMesh = new THREE.Mesh(new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ));
+    SphereMesh.position.copy(PointsAndDirectionsArray[0]["PointMesh"].position);    
+    Camera.position.set(SphereMesh.position.x + 10 ,SphereMesh.position.y + 10, SphereMesh.position.z + 10);
+    Camera.lookAt(SphereMesh);
+    function animate(time) {
+        updatableFuncs.every(function (funcname){
+            funcname();
+        });
+        //controls.update();
+
+        Renderer.render(Scene, Camera);
+        requestAnimationFrame(animate);
+    }
+    animate();
 </script>
 </body>
 </html>

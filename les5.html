@@ -27,7 +27,7 @@
     var Material = new THREE.MeshBasicMaterial( {vertexColors: THREE.FaceColors } );
 
     //Массив кубов
-    var Cubes = [[]], n = 60, m = 40, k =0;
+    var Cubes = [[]], n = 60, m = 60, k =0;
 
     for (var i=0; i<n; i++){
         Cubes.push([]);
@@ -39,7 +39,7 @@
             for (var j1=0; j1<6; j1++){
                 var color1 = new THREE.Color();
                 color1.setRGB(Math.random(), Math.random(),Math.random());
-                Cubes[i][j].geometry.faces[2*j1].color     = color1;
+                Cubes[i][j].geometry.faces[2*j1].color = color1;
                 Cubes[i][j].geometry.faces[2*j1+1].color = color1 ;
             }
 

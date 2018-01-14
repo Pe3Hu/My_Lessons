@@ -39,7 +39,7 @@
     var Material = new THREE.MeshBasicMaterial( {vertexColors: THREE.FaceColors, side: THREE.DoubleSide } );
 
     //Массив кубов
-    var Cubes = [[[]]], n = 20, m = 20, speed = 0, min_bar = 2, camera_speed = 0, s=Math.PI*2/180, gap = n/2;
+    var Cubes = [[[]]], n = 20, m = 20, speed = 0, min_bar = 2, camera_speed = 0, s=Math.PI/90, gap = n/2;
     for (var k=0; k<6; k++){
                 Cubes.push([[]]);
                 for (var i=0; i<n; i++){
@@ -115,7 +115,7 @@
 
     var animate = function () {
         requestAnimationFrame( animate );
-        speed+=0.02;
+        speed+=0.05;
         //Анимация волн
         for (var k=0; k<6; k++){
             for (var i=0; i<n; i++)
