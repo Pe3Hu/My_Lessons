@@ -17,15 +17,16 @@
 <script src="../libraries/three.js-r87/examples/js/postprocessing/BloomPass.js"></script>
 <script src="../libraries/three.js-r87/examples/js/Detector.js"></script>
 <script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
+
 <script>
     
    function controlSphereMoving()
     {
         SphereMesh.position.add(PointsAndDirectionsArray[ControlInfo.CurrentPointAndDirectionIndex]["Direction"]);
         LenVector.copy(PointsAndDirectionsArray[ControlInfo.TargetPointAndDirectionIndex]["PointMesh"].position);
-//      Camera.position.copy(SphereMesh.position);
-//      Camera.position.addScalar(200, 200, 0);
-        //Camera.lookAt(PointsAndDirectionsArray[ControlInfo.TargetPointAndDirectionIndex]["PointMesh"].position);
+  //      Camera.position.copy(SphereMesh.position);
+  //      Camera.position.addScalar(200, 200, 0);
+       // Camera.lookAt(PointsAndDirectionsArray[ControlInfo.TargetPointAndDirectionIndex]["PointMesh"].position);
         LenVector.sub(SphereMesh.position);
         if(LenVector.length() < 2)
         {
@@ -38,6 +39,12 @@
             InfoDiv.innerText = "Moving: " + ControlInfo.CurrentPointAndDirectionIndex + " => " + ControlInfo.TargetPointAndDirectionIndex + " .";
         }
     };
+
+
+    var Container, Stats = new Stats();
+    Container = document.createElement( 'div' );
+    document.body.appendChild( Container );
+    Container.appendChild( Stats.dom);
     var InfoDiv = document.createElement("div");
     InfoDiv.style.position = "absolute";
     InfoDiv.style.left = "50px";
@@ -66,9 +73,9 @@
     var Camera = new THREE.PerspectiveCamera( 33, window.innerWidth / window.innerHeight, 1, 10000 );
 
     // var Controls = new THREE.OrbitControls( Camera );
-    //Camera.position.set( 0, 20, 100 );
+    Camera.position.set( 400, 400, 400 );
     //Controls.update();
-    var Geometry = new THREE.SphereGeometry(30, 2, 2);
+    var Geometry = new THREE.SphereGeometry(5, 32, 32);
     var Material = new THREE.MeshBasicMaterial({color: 0xff00ff});
     var SphereMesh = new THREE.Mesh(Geometry, Material);
     var Room = new THREE.Mesh(
@@ -77,8 +84,7 @@
     );
 
     var HilbertGeometry = new THREE.Geometry(), Colors = [],
-        Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 ),
-        Points2 = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 0, 0, 1, 2, 3, 4, 5, 6, 7 );
+        Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 100.0, 2, 0, 1, 2, 3, 4, 5, 6, 7 );
     for ( i = 0; i < Points.length; i ++ ) {
         HilbertGeometry.vertices.push( Points[ i ] );
         Colors[ i ] = new THREE.Color( 0xffffff );
@@ -88,8 +94,8 @@
     HilbertGeometry.colors = Colors;
     // lines
     Material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
-    var Line, scale = 0.3, d = 225;
-    var Parameters = [ Material, scale*2.5, [0,0,0],  HilbertGeometry ];
+    var Line, scale = 1, d = 225;
+    var Parameters = [ Material, scale, [0,0,0],  HilbertGeometry ];
     Line = new THREE.Line( Parameters[ 3 ],  Parameters[ 0 ] );
     Line.scale.x = Line.scale.y = Line.scale.z =  Parameters[ 1 ];
     Line.position.x = Parameters[ 2 ][ 0 ];
@@ -98,15 +104,15 @@
     Scene.add( Line );                    
 
     var PointsAndDirectionsArray = [];
-    for (var i=0; i<Points2.length; i++)
+    for (var i=0; i<Points.length; i++)
     {
         var Point = new THREE.Mesh(
-            new THREE.SphereGeometry(10, 32, 32),
+            new THREE.SphereGeometry(5, 32, 32),
             new THREE.MeshBasicMaterial({color: 0x2194ce})
         );
-        var [x,y,z] = [Points2[ i ].getComponent ( 0 ) , 
-                       Points2[ i ].getComponent ( 1 ) , 
-                       Points2[ i ].getComponent ( 2 ) , 
+        var [x,y,z] = [Points[ i ].getComponent ( 0 ) , 
+                       Points[ i ].getComponent ( 1 ) , 
+                       Points[ i ].getComponent ( 2 ) , 
                       ];
         Point.position.set(x,y,z);
         Scene.add(Point);
@@ -134,17 +140,20 @@
     Scene.add(Room);
     Scene.add(SphereMesh);
     Scene.add(Camera);
-    Camera.position.set(0,0, 200);
+    //Camera.position.set(0,0, 200);
     var updatableFuncs = [controlSphereMoving];
-    SphereMesh = new THREE.Mesh(new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ));
+    //SphereMesh = new THREE.Mesh(new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ));
     SphereMesh.position.copy(PointsAndDirectionsArray[0]["PointMesh"].position);    
-    Camera.position.set(SphereMesh.position.x + 10 ,SphereMesh.position.y + 10, SphereMesh.position.z + 10);
-    Camera.lookAt(SphereMesh);
+   // Camera.position.set(SphereMesh.position.x + 10 ,SphereMesh.position.y + 10, SphereMesh.position.z + 10);
+    //Camera.lookAt(SphereMesh);
     function animate(time) {
         updatableFuncs.every(function (funcname){
             funcname();
         });
         //controls.update();
+        
+
+        Stats.update();
 
         Renderer.render(Scene, Camera);
         requestAnimationFrame(animate);

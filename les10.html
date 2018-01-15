@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Array points. 10 lesson Three.js</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+<script src="../libraries/three.js-r87/build/three.min.js"></script>
+<script src="../libraries/three.js-r87/src/helpers/AxisHelper.js"> </script>
+<script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
+<script src="../libraries/three.js-r87/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+
+    var Container, Stats = new Stats();
+    Container = document.createElement( 'div' );
+    document.body.appendChild( Container );
+    Container.appendChild( Stats.dom);
+
+
+    var Scene = new THREE.Scene();
+    var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    var Camera_Radius = 5;
+    //Camera.position.set(0, 0, 4*gap);
+    Camera.position.set(2*Camera_Radius, 2*Camera_Radius, 2*Camera_Radius);
+    Camera.lookAt(new THREE.Vector3(0,0,0));
+
+    var Controls = new THREE.OrbitControls( Camera );
+
+
+    var Renderer = new THREE.WebGLRenderer({antialias: true});
+    Renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( Renderer.domElement );
+
+    var Geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var Material = [ new THREE.MeshBasicMaterial( { color: 0xF4C430 } ),
+        new THREE.MeshBasicMaterial( { color: 0xC8A2C8 } ),
+        new THREE.MeshBasicMaterial( { color: 0x007FFF } ),
+        new THREE.MeshBasicMaterial( { color: 0x3B005C } ),
+        new THREE.MeshBasicMaterial( { color: 0x00A86B } ),
+        new THREE.MeshBasicMaterial( { color: 0xDC143C } ),
+    ];
+
+    var Colors = [ new THREE.Color( 0xF4C430 ),
+    new THREE.Color( 0xC8A2C8 ),
+    new THREE.Color( 0x007FFF ),
+    new THREE.Color( 0x3B005C ),
+    new THREE.Color( 0x00A86B ),
+    new THREE.Color( 0xDC143C )
+    ];
+
+    //    var Geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    //var Material = new THREE.MeshBasicMaterial( {vertexColors: THREE.FaceColors } );
+
+    //Массив кубов
+    var maze = [[]], Cubes = [[]], n = 6, m = 6, k =0;
+
+//int maze[height][width]; //создаем матрицу - двумерный массив
+        for(i = 0; i < height; i++){
+            maze.push([]);
+                for(j = 0; j < width; j++){
+                    maze[i].push(cell(new THREE.Vector3((-n/2 + i + 0.5, 0, m/2 + j + 0.5);
+                    if((i % 2 != 0  && j % 2 != 0) && //если ячейка нечетная по x и y, 
+                       (i < height-1 && j < width-1))   //и при этом находится в пределах стен лабиринта
+                           maze[i][j].type = CELL;       //то это КЛЕТКА
+                    //else maze[i][j] = WALL;           //в остальных случаях это СТЕНА.
+                }
+            }
+
+
+
+function cell(v3) {
+  this.x = v3.getComponent(0);
+  this.y = v3.getComponent(1);
+  this.z = v3.getComponent(2);
+  this.color = new THREE.Color( 0xF4C430 );  
+  this.type = "WALL";
+
+}
+
+typedef struct cellString{ 
+    cell* cells;
+    unsigned int size;
+} cellString;
+
+function getNeighbours(){
+    var i, x = this.x, z = this.z;
+    var up = new THREE.Vector3(x, 0, z - distance ),
+    rt = new THREE.Vector3(x + distance, 0, z),
+    dw = new THREE.Vector3(x, 0, z + distance),
+    lf = new THREE.Vector3(x - distance, 0, z),
+    d = [dw, rt, up, lf], size = 0;
+
+    cellString cells;
+    cells.cells = malloc(4 * sizeof(cell));
+}
+
+    for(i = 0; i < 4; i++){ //для каждого направдения
+        if(d[i].x > 0 && d[i].x < width && d[i].y > 0 && d[i].y < height){ //если не выходит за границы лабиринта
+            unsigned int mazeCellCurrent = maze[d[i].y][d[i].x];
+            cell     cellCurrent     = d[i];
+            if(mazeCellCurrent != WALL && mazeCellCurrent != VISITED){ //и не посещена\является стеной
+                cells.cells[size] = cellCurrent; //записать в массив;
+                size++;
+            }
+        }
+    }
+    cells.size = size;
+    return cells;
+
+function removeWall(cell){
+    short int xDiff = second.x - first.x;
+    short int yDiff = second.y - first.y;
+    short int addX, addY;
+    cell target;
+
+    addX = (xDiff != 0) ? (xDiff / abs(xDiff)) : 0;
+    addY = (yDiff != 0) ? (yDiff / abs(yDiff)) : 0;
+
+    target.x = first.x + addX; //координаты стенки
+    target.y = first.y + addY;
+
+    maze[target.y][target.x] = VISITED;
+    return maze;
+}
+
+
+    var startCell = cell(new THREE.Vector3(1,1,0), Colors[0]), currentCell = startCell, neighbourCell;
+    do{
+        cellString Neighbours = getNeighbours(width, height, maze, startPoint, 2);
+        if(Neighbours.size != 0){ //если у клетки есть непосещенные соседи
+            randNum  = randomRange(0, Neighbours.size-1);
+            neighbourCell = cellStringNeighbours.cells[randNum]; //выбираем случайного соседа
+            push(d.startPoint); //заносим текущую точку в стек
+            maze = removeWall(currentCell, neighbourCell, maze); //убираем стену между текущей и сосендней точками
+            currentCell = neighbourCell; //делаем соседнюю точку текущей и отмечаем ее посещенной
+            maze = setMode(d.startPoint, d.maze, VISITED);
+            free(cellStringNeighbours.cells);
+        }
+        else if(stackSize > 0){ //если нет соседей, возвращаемся на предыдущую точку
+            startPoint = pop();
+        }
+        else{ //если нет соседей и точек в стеке, но не все точки посещены, выбираем случайную из непосещенных
+            cellString cellStringUnvisited = getUnvisitedCells(width, height, maze);
+            randNum = randomRange(0, cellStringUnvisited.size-1);
+            currentCell = cellStringUnvisited.cells[randNum];
+            free(cellStringUnvisited.cells);
+        }
+    while(unvisitedCount() > 0);            
+
+
+/*
+    for (var i=0; i<n; i++){
+        Cubes.push([]);
+        for (var j=0; j<m; j++){
+            /*
+            if ((i+j)%2 == 1)                
+                Cubes[i].push(new THREE.Mesh(Geometry, Material[0]));
+            else
+                Cubes[i].push(new THREE.Mesh(Geometry, Material[1]));*/
+            Cubes[i].push(new THREE.Mesh(Geometry, Material[(i+j)%6]));
+            Cubes[i][j].position.z = -m/2 + j + 0.5;
+            Cubes[i][j].position.x = -n/2 + i + 0.5;
+            
+            Scene.add(Cubes[i][j]);
+        }
+    }*/
+               
+
+    var AxisHelper = new THREE.AxisHelper( 5 );
+    Scene.add( AxisHelper );
+
+    var animate = function () {
+        requestAnimationFrame( animate );
+        Stats.update();
+        Controls.update();
+        Renderer.render(Scene, Camera);
+    };
+    animate();
+</script>
+</body>

@@ -45,18 +45,23 @@
         <script src="../libraries/three.js-r87/examples/js/postprocessing/BloomPass.js"></script>
         <script src="../libraries/three.js-r87/examples/js/Detector.js"></script>
         <script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
+
+<script src="../libraries/three.js-r87/examples/js/controls/OrbitControls.js"></script>
+
         <script>
             if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-            var effectFXAA;
+            var effectFXAA,  player,
+                    Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
             var mouseX = 0, mouseY = 0,
             windowHalfX = window.innerWidth / 2,
             windowHalfY = window.innerHeight / 2,
             Camera, Scene, Renderer, Material, Composer;
+
             init();
             animate();
             function init() {
-                var i, Container;
+                var i, Container, lambda = 0;
                 Container = document.createElement( 'div' );
                 document.body.appendChild( Container );
                 Camera = new THREE.PerspectiveCamera( 33, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -67,27 +72,43 @@
                 Renderer.setSize( window.innerWidth, window.innerHeight );
                 Renderer.autoClear = false;
                 Container.appendChild( Renderer.domElement );
-                var Cube = new THREE.Mesh(new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ));
+                var Cube = new THREE.Mesh(new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x0000ff } ));
                 Scene.add(Cube);
-                var Geometry = new THREE.Geometry(), Colors = [],
-                    Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
+                var Geometry = new THREE.Geometry(), Colors = [];
                 for ( i = 0; i < Points.length; i ++ ) {
                     Geometry.vertices.push( Points[ i ] );
                     Colors[ i ] = new THREE.Color( 0xffffff );
                     //Colors[ i ].setHSL( 0.6, 1.0, Math.max( 0, ( 200 - Points[ i ].x ) / 400 ) * 0.5 + 0.5 );
                     Colors[ i ].setHSL( i / Points.length, 1.0, 0.5 );
+                    var point = new THREE.Mesh(geometry, material);
+                    point.position.copy(Points[i]);
+                    Scene.add(point);
                 }
+
+                var geometry = new THREE.BoxGeometry( 10, 10, 10 );
+                var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+                
+                var Controls = new THREE.OrbitControls( Camera );
+            
                 Geometry.colors = Colors;
                 // lines
                 Material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
-                var Line, scale = 0.3, d = 225;
-                var Parameters = [ Material, scale*2.5, [0,0,0],  Geometry ];
+                var Line, scale = 1, d = 225;
+                var Parameters = [ Material, scale, [0,0,0],  Geometry ];
                 Line = new THREE.Line( Parameters[ 3 ],  Parameters[ 0 ] );
                 Line.scale.x = Line.scale.y = Line.scale.z =  Parameters[ 1 ];
                 Line.position.x = Parameters[ 2 ][ 0 ];
                 Line.position.y = Parameters[ 2 ][ 1 ];
                 Line.position.z = Parameters[ 2 ][ 2 ];
-                Scene.add( Line );                            
+                Scene.add( Line );
+
+                //v3.add(new THREE.Vector3.copy(Points[1]));
+                // v3.multiplyScalar (0.5);
+                
+                player = new THREE.Mesh(geometry, material);    
+                player.position.copy(Points[0]);
+                Scene.add( player );
+
                 //
                 Stats = new Stats();
                 //container.appendChild( stats.dom );
@@ -147,17 +168,18 @@
                 Stats.update();
             }
             function render() {
-                Camera.position.x += ( mouseX - Camera.position.x ) * .05;
+                /*Camera.position.x += ( mouseX - Camera.position.x ) * .05;
                 Camera.position.y += ( - mouseY + 200 - Camera.position.y ) * .05;
                 Camera.lookAt( Scene.position );
                 var time = Date.now() * 0.0005;
                 for ( var i = 0; i < Scene.children.length; i ++ ) {
                     var Object = Scene.children[ i ];
                     if ( Object instanceof THREE.Line ) Object.rotation.y = time * ( i % 2 ? 1 : -1 );
-                }
-
-            
+                }     */       
                 //Cube.rotation.y = time;
+
+               
+
                 Renderer.clear();
                 Composer.render();
             }
