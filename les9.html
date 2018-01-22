@@ -45,14 +45,12 @@
         <script src="../libraries/three.js-r87/examples/js/postprocessing/BloomPass.js"></script>
         <script src="../libraries/three.js-r87/examples/js/Detector.js"></script>
         <script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
-
-<script src="../libraries/three.js-r87/examples/js/controls/OrbitControls.js"></script>
-
+        <script src="../libraries/three.js-r87/examples/js/controls/OrbitControls.js"></script>
         <script>
             if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
             var effectFXAA,  player,
-                    Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
+                    Points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 4, 0, 1, 2, 3, 4, 5, 6, 7 );
             var mouseX = 0, mouseY = 0,
             windowHalfX = window.innerWidth / 2,
             windowHalfY = window.innerHeight / 2,
@@ -73,7 +71,7 @@
                 Renderer.autoClear = false;
                 Container.appendChild( Renderer.domElement );
                 var Cube = new THREE.Mesh(new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x0000ff } ));
-                Scene.add(Cube);
+                //Scene.add(Cube);
                 var Geometry = new THREE.Geometry(), Colors = [];
                 for ( i = 0; i < Points.length; i ++ ) {
                     Geometry.vertices.push( Points[ i ] );
@@ -107,7 +105,7 @@
                 
                 player = new THREE.Mesh(geometry, material);    
                 player.position.copy(Points[0]);
-                Scene.add( player );
+                //Scene.add( player );
 
                 //
                 Stats = new Stats();

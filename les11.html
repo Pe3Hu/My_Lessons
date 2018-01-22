@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -54,193 +53,48 @@
 <script src="../libraries/three.js-r87/examples/js/Detector.js"></script>
 <script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
 
-        <script>
+    <script>
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+            camera.position.z = 20;
 
-            if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
 
+            var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 
-            var mouseX = 0, mouseY = 0,
-            g=0, j=0,
-            
-            windowHalfX = window.innerWidth / 2,
-            windowHalfY = window.innerHeight / 2,
-
-            camera, scene, renderer, material;
-
-            init();
-            animate();
-            
-            var P, points;
-
-            function init() {
-
-                var i=0, container;
-
-                container = document.createElement( 'div' );
-                document.body.appendChild( container );
-
-                camera = new THREE.PerspectiveCamera( 33, window.innerWidth / window.innerHeight, 1, 10000 );
-                camera.position.z = 700;
-
-                scene = new THREE.Scene();
-
-                renderer = new THREE.CanvasRenderer();
-                renderer.setPixelRatio( window.devicePixelRatio );
-                renderer.setSize( window.innerWidth, window.innerHeight );
-                container.appendChild( renderer.domElement );
-
-                var geometry3 = new THREE.Geometry(),colors3 = [];
-                points = hilbert3D( new THREE.Vector3( 0,0,0 ), 200.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
-                    
-
-                var starsGeometry = new THREE.BoxGeometry();
-
-                var starsMaterial = new THREE.PointsMaterial( { color: 0x110011 } );
-
-
-                for ( var i = 0; i < points.length; i ++ ) {
-                
-                    geometry3.vertices.push( points[ i ] );
-
-                    colors3[ i ] = new THREE.Color( 0xffffff );
-                    colors3[ i ].setHSL( i / points.length, 1.0, 0.5 );
-                    
-                }
-                
-                P=new THREE.Mesh( starsGeometry, starsMaterial );
-                P.position.x=points[0].x;
-                P.position.y=points[0].y;
-                P.position.z=points[0].z;
-                P.scale.set(6,6,6);
-                scene.add( P );
-
-                    
-                geometry3.colors = colors3;
-
-                // lines
-
-                material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
-
-                var line, p, scale = 1, d = 225;
-
-                line = new THREE.Line(geometry3, material );
-                line.scale.x = line.scale.y = line.scale.z =  scale;
-                line.position.x = 0;
-                line.position.y = 0;
-                line.position.z = 0;
-                scene.add( line );
-
-                //
-
-                stats = new Stats();
-                //container.appendChild( stats.dom );
-
-                //
-
-                document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-                document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-                document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-
-                //
-
-                window.addEventListener( 'resize', onWindowResize, false );
-
+            //Массив кубов
+            var cubes = [], n =1, j = 0;
+            for (var i=0; i<n; i++) {
+                cubes.push(new THREE.Mesh(geometry, material));
+                cubes[i].position.x = -n/2 + i+ 0.5;
+                scene.add(cubes[i]);
             }
+            //Длина окружности
+            var l = cubes[cubes.length-1].position.x - cubes[0].position.x, j = 0;
 
-            function onWindowResize() {
-
-                windowHalfX = window.innerWidth / 2;
-                windowHalfY = window.innerHeight / 2;
-
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-
-                renderer.setSize( window.innerWidth, window.innerHeight );
-
-            }
-
-            //
-
-            function onDocumentMouseMove( event ) {
-
-                mouseX = event.clientX - windowHalfX;
-                mouseY = event.clientY - windowHalfY;
-
-            }
-
-            function onDocumentTouchStart( event ) {
-
-                if ( event.touches.length > 1 ) {
-
-                    event.preventDefault();
-
-                    mouseX = event.touches[ 0 ].pageX - windowHalfX;
-                    mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
-                }
-
-            }
-
-            function onDocumentTouchMove( event ) {
-
-                if ( event.touches.length == 1 ) {
-
-                    event.preventDefault();
-
-                    mouseX = event.touches[ 0 ].pageX - windowHalfX;
-                    mouseY = event.touches[ 0 ].pageY - windowHalfY;
-                }
-
-            }
-
-            //
-
-            function animate() {
-
-                render();
-
-                stats.update();
+            var animate = function () {
                 requestAnimationFrame( animate );
-            }
-
-            function render() {
-            
-                if (  g < points.length-1 ) {
                 
-                
-                    if(j<100){
-                    
-                        P.position.x=(1-0.01*j)*points[g].x+(0.01*j)*points[g+1].x;
-                        P.position.y=(1-0.01*j)*points[g].y+(0.01*j)*points[g+1].y;
-                        P.position.z=(1-0.01*j)*points[g].z+(0.01*j)*points[g+1].z;
-                        scene.add( P );
-                        j++;
-                    }
-                    else{
-                        g++;
-                        j=0;
-                    }
+                   //График sin
+                if (j<2)
+                {
+                    j+=0.05;
+                    cubes[0].position.x+=0.05;
+                    cubes[0].position.y=(-j*j+2*j- 1)*10; //    pow((j-a),2)+b;
                     
                 }
-                
-                camera.position.x += ( mouseX - camera.position.x ) * .05;
-                camera.position.y += ( - mouseY + 200 - camera.position.y ) * .05;
+                else j=0;
+                //Возможность вращения
+                //cube.rotation.x += 0.1;
+                //cube.rotation.y += 0.1;
 
-                camera.lookAt( scene.position );
+                renderer.render(scene, camera);
+            };
 
-                var time = 0;//Date.now() * 0.0005;
-
-                for ( var i = 0; i < scene.children.length; i ++ ) {
-
-                    var object = scene.children[ i ];
-                    if ( object instanceof THREE.Line ) object.rotation.y = time * ( i % 2 ? 1 : -1 );
-
-                }
-
-                renderer.render(scene, camera );
-
-            }
-
-        </script>
+            animate();
+       </script>
     </body>
 </html>
