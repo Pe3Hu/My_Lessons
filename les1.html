@@ -11,79 +11,75 @@
 
 		<script src="../libraries/three.js-r87/build/three.min.js"></script>
 		<script src="../libraries/three.js-r87/examples/js/loaders/ColladaLoader.js"></script>
-
 		<script src="../libraries/three.js-r87/examples/js/libs/stats.min.js"></script>
-
         <script src="libs/OrbitControls.js"></script>
-
 		<script>
 
-
-    var Container, Stats = new Stats();
-    Container = document.createElement( 'div' );
-    document.body.appendChild( Container );
-    Container.appendChild( Stats.dom);
-				var ColladaLoader = new THREE.ColladaLoader();
-				var prom = load3DSceneByCollada(ColladaLoader, "Bitcoin4.dae");
-				prom.then(onSceneLoaded);
-			
-
-/*
-
- */            
+	    var Container, Stats = new Stats();
+	    Container = document.createElement( 'div' );
+	    document.body.appendChild( Container );
+	    Container.appendChild( Stats.dom);
+		var ColladaLoader = new THREE.ColladaLoader();
+		var prom = load3DSceneByCollada(ColladaLoader, "denseBitcoin.dae");
+		prom.then(onSceneLoaded);
+         
 		function onSceneLoaded(collada)
 			{
 				var scene = new THREE.Scene();
+				//scene.background = new THREE.Color( 0xcce0ff );
+				//scene.fog = new THREE.Fog( 0xcce0ff, 500, 10000 );
+
 				var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
 				var renderer = new THREE.WebGLRenderer(), t = 0;
-
-
+				var clothGeometry, sphere, object;
+			
 				renderer.setSize(window.innerWidth, window.innerHeight);
 				document.body.appendChild(renderer.domElement);
-				camera.position.set(0, 0, 40);
-				/*var loader = new THREE.ColladaLoader(), Points;
-				loader.load("Bitcoin.dae", function (result) {
-					Points = result.scene.children[2].children[0].geometry.vertices;
-					scene.add(result.scene);
-				});*/
-				var Points, Dots = [], InitDots = [], CurrentDots = [], scale = 10;
-				Points = collada.scene.children[0].children[0].geometry.vertices;
-				/*for(i = 0; i < collada.scene.children.length; i++) {
-				if(collada.scene.children[i].geometry) {
-				for(j = 0; j < collada.scene.children[i].geometry.vertices.length; j++) {
-				Points.push(collada.scene.children[i].geometry.vertices[j]);
-				}
-				}
-				}*/
-				//var Line, Geometry = new THREE.Geometry(), Material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors } );
-				 
-                var controls = new THREE.OrbitControls( camera);
-                scene.userData.controls = controls;   
-			    for (var i = 0; i < Points.length; i ++ ) 
-			    {
-			    	var geometry = new THREE.SphereBufferGeometry( 0.2, 32, 32 );
-					var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-					var sphere = new THREE.Mesh( geometry, material );
+				camera.position.set(0, 0, 20);
+			
+				var Points, BgDots = [], Dots = [], scale = 10, t = 0;
+				Points = collada.scene.children[0].children[0].geometry.vertices;				
+                var controls = new THREE.OrbitControls( camera); 
+                			    
+	
+			    scene.background = new THREE.CubeTextureLoader()
+				.setPath( 'skybox/' )
+				.load( [
+					'px.jpg',
+					'nx.jpg',
+					'py.jpg',
+					'ny.jpg',
+					'pz.jpg',
+					'nz.jpg'
+				] );           	
 
-				    sphere.position.x=Points[i].getComponent(0)*scale;
-				    sphere.position.y=Points[i].getComponent(1)*scale;
-				    sphere.position.z=Points[i].getComponent(2)*scale;
-					//sphere.position = Points[i];
-					Dots.push(sphere);
-					scene.add( Dots[i] );
 
-	        		//Geometry.vertices.push( Points[ i ] );
-			    }
-			    /*
+			  	var balls = 10;
+                var size = .5;
+                var colors = [
+                    'rgb(0,127,255)', 'rgb(255,0,0)', 'rgb(0,255,0)', 'rgb(0,255,255)',
+                    'rgb(255,0,255)', 'rgb(255,0,127)', 'rgb(255,255,0)', 'rgb(0,255,127)'
+                ];/*
+			    var lattice = true;
 			     var geometry = new THREE.Geometry();
                     var geometry0 = new THREE.Geometry();
-                    if ( views[n].lattice ) {
+                    if ( lattice ) {
                         var range = balls / 2;
                         for ( var i = -range ; i <= range ; i++ ) {
                             for ( var j = -range ; j <= range ; j++ ) {
                                 for ( var k = -range ; k <= range ; k++ ) {
-                                    geometry.vertices.push( new THREE.Vector3( i, j, k ) );
-                                    geometry0.vertices.push( new THREE.Vector3( i, j, k ) );
+
+			    	var geometry = new THREE.SphereBufferGeometry( size, 20, 20);
+					var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+					var sphere = new THREE.Mesh( geometry, material );
+				    sphere.position.x=i*scale;				    
+				    sphere.position.y=j*scale;
+				    sphere.position.z=k*scale;
+					BgDots.push(sphere);
+					scene.add( BgDots[i] );
+
+                                    //geometry.vertices.push( new THREE.Vector3( i, j, k ) );
+                                    //geometry0.vertices.push( new THREE.Vector3( i, j, k ) );
                                 }
                             }
                         }
@@ -91,12 +87,34 @@
                         for ( var m = 0 ; m < Math.pow( balls, 4 ) ; m++ ) {
                             var i = balls * Math.random() - balls / 2;
                             var j = balls * Math.random() - balls / 2;
-                            var k = balls * Math.random() - balls / 2;
-                            geometry.vertices.push( new THREE.Vector3( i, j, k ) );
-                            geometry0.vertices.push( new THREE.Vector3( i, j, k ) );
+                            var k = balls * Math.random() - balls / 2;                         
+
+					    	var geometry = new THREE.SphereBufferGeometry( size, 20, 20);
+							var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+							var sphere = new THREE.Mesh( geometry, material );
+						    sphere.position.x=i*scale;				    
+						    sphere.position.y=j*scale;
+						    sphere.position.z=k*scale;
+							BgDots.push(sphere);
+							scene.add( BgDots[i] );
+                            //geometry.vertices.push( new THREE.Vector3( i, j, k ) );
+                            //geometry0.vertices.push( new THREE.Vector3( i, j, k ) );
                         }
                     }	
-
+ 				scene.add( new THREE.Points( geometry, new THREE.MeshBasicMaterial( {color: 0xff00ff} ) ) );
+*/
+ 				scene.userData.controls = controls;   
+			    for (var i = 0; i < Points.length; i ++ ) 
+			    {
+			    	var geometry = new THREE.SphereBufferGeometry( size, 20, 20);
+					var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+					var sphere = new THREE.Mesh( geometry, material );
+				    sphere.position.x=Points[i].getComponent(0)*scale;				    
+				    sphere.position.y=Points[i].getComponent(1)*scale;
+				    sphere.position.z=Points[i].getComponent(2)*scale;
+					Dots.push(sphere);
+					scene.add( Dots[i] );
+			    }
 				//Line = new THREE.Line( Geometry,  Material );
 				//scene.add( Line );
 				//scene.add(collada.scene);
@@ -116,6 +134,7 @@
 
 			*/	
 				animate();
+				//var way = 1
 			
 
 
@@ -126,33 +145,38 @@
 
             }
 				function render() {
-				//if (t< 100 && way)
+				 /*if (way>0 && t%100 == 0)
+				 	way=1;
+				if (way<0 && t%100 == 0)
+				 	way=-1;*/
+
 
 						t++;
-								var t1 = t /5	;
-					var st =Math.sin(t1)*10, sgt = Math.sign(st);
+				var t1 = t /30	;
+				var st =Math.sin(t1)*3+12, cs = Math.cos(t1)*5+10, sgt = Math.sign(st);
+					//if (sgt>0 )
 				for (var i = 0; i < Dots.length; i ++ ) {
-			
-
-
 				    Dots[i].position.x= Points[i].getComponent(0)*st*sgt;
-				    //Dots[i].position.y= Points[i].getComponent(1)*st*sgt;
-				   // Dots[i].position.z= Points[i].getComponent(2)*st*sgt;
-
+				    Dots[i].position.y= Points[i].getComponent(1)*st*sgt;
+ 					Dots[i].position.z= Points[i].getComponent(2)*st*sgt;
 				}
-			    
-					 /* for ( var i = 0 ; i < Dots.length ; i++ ) {
-                        var v0 = Dots[i].position;
+				//camera.position.z +=way; 
+				
+				                        	//sgeometry.scale(st, 0, 0); 
+				                        
+							    
+									  /*for ( var i = 0 ; i < Dots.length ; i++ ) {
+				                        var v0 = Do)ts[i].position;
                         var v = displacement( v0.getComponent(0), v0.getComponent(1), v0.getComponent(2), t/30);
-
-
-                        Dots[i].set( v.getComponent(0) + v0.getComponent(0), v.getComponent(1)+ v0.getComponent(1), v.getComponent(2) + v0.getComponent(2) );
+                        Dots[i].position.x = v.getComponent(0) + v0.getComponent(0);
+                        Dots[i].position.y = v.getComponent(1) + v0.getComponent(1);
+                        Dots[i].position.z = v.getComponent(2) + v0.getComponent(2);
                     }*/
-                    //Dots.verticesNeedUpdate = true;
+                Dots.verticesNeedUpdate = true;                    
 
-      				  Stats.update();
-					requestAnimationFrame(render);
-					renderer.render(scene, camera);
+  				Stats.update();
+				renderer.render(scene, camera);
+					//t++;
 					
 				}
 			}
@@ -172,10 +196,10 @@
 			};
 
 		function displacement( x, y, z, t ) {
-               /* var x1 = Math.sin(x - t), 
+               var x1 = Math.sin(x - t), 
                 y1 = Math.sin(y - t), 
-                z1 = Math.sin(z - t), 
-                m = 0;
+                z1 = Math.sin(z - t); 
+               /* m = 0;
                 if (x1<m) 
                     x1 =m;
                 if (y1<m) 
@@ -185,11 +209,9 @@
                 */
                 
                 //return new THREE.Vector3( x, y, z);
-                //return new THREE.Vector3( x*Math.sign(Math.sin(t))*Math.sin(t)/2, y*Math.sign(Math.sin(t))*Math.sin(t)/2, z*Math.sign(Math.sin(t))*Math.sin(t)/2);//Math.sin(y+t), Math.sin(z+t));// Math.cos(z + t)); -Math.sin(y - t)
-                return new THREE.Vector3( x*Math.sign(Math.sin(t))*Math.sin(t)/2, y*Math.sign(Math.sin(t))*Math.sin(t)/2, z*Math.sign(Math.sin(t))*Math.sin(t)/2);
+                return new THREE.Vector3( x*Math.sign(Math.sin(t))*Math.sin(t)/2, y*Math.sign(Math.sin(t))*Math.sin(t)/2, z*Math.sign(Math.sin(t))*Math.sin(t)/2);//Math.sin(y+t), Math.sin(z+t));// Math.cos(z + t)); -Math.sin(y - t)
+                //return new THREE.Vector3( x*Math.sign(Math.sin(t))*Math.sin(t)/2, y*Math.sign(Math.sin(t))*Math.sin(t)/2, z*Math.sign(Math.sin(t))*Math.sin(t)/2);
             };
 		</script>
-		<script>
-		 parent.d
-		</script>
+		
 	</body>
