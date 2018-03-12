@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>nothing</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+<script src="libs/three.min.js"></script>
+
+<script>
+    var Scene = new THREE.Scene(), radius = 15;
+    var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    
+    var rad = new THREE.Vector3(radius,radius,radius);
+    var speed = new THREE.Vector3(0.3,0,0.6);
+    var acc = new THREE.Vector3(0,0,0);
+    Camera.position.set(radius,radius,radius);
+    Camera.lookAt(new THREE.Vector3(0,0,0));
+
+    var Renderer = new THREE.WebGLRenderer();
+    Renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( Renderer.domElement );
+
+    var Cubes = [[]], n = 6, m = 4, k = 0, r = 200;
+
+    var sphere_geometry = new THREE.SphereBufferGeometry( 5, 32, 32 );
+	var sphere_material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+	var sphere = new THREE.Mesh( sphere_geometry, sphere_material );
+	sphere.position.x = -50;
+	//Scene.add( sphere );
+
+    for (var i=0; i<n; i++){
+        Cubes.push([]);
+        for (var j=0; j<m; j++){
+            Cubes[i].push(new THREE.Mesh(sphere_geometry, sphere_material));
+            Cubes[i][j].position.x = -r/2 + Math.random(0, 1)*r
+            Cubes[i][j].position.z = -r/2 + Math.random(0, 1)*r            
+
+            Scene.add(Cubes[i][j]);}
+        }
+   
+
+	var cone_geometry = new THREE.ConeGeometry( 5, 20, 32 );
+	var cone_material = new THREE.MeshBasicMaterial( {color: 0xff00ff} );
+	var cone = new THREE.Mesh( cone_geometry, cone_material );
+	cone.position.x = 50;
+	Scene.add( cone );
+
+	
+	var player1 = new THREE.Box3(), player2 = new THREE.Box3();
+	//var speed = 1; 
+	var helper = new THREE.Box3Helper( player1, 0xffff00 );
+	Scene.add( helper );
+	
+    var animate = function () {
+		player1.setFromObject(cone);
+		for (var i=0; i<n; i++){        
+        	for (var j=0; j<m; j++){
+			player2.setFromObject(Cubes[i][j]);
+			if (player1.intersectsBox(player2))
+				speed.x *= -1;
+			}
+		}
+        cone.position.add(speed);
+        var pos = cone.position.clone();
+        pos.add(rad);
+        Camera.position.set(pos.x,pos.y,pos.z);
+		//Camera.lookAt(pos);
+        requestAnimationFrame( animate );
+        Renderer.render(Scene, Camera);
+    };
+
+    animate();
+</script>
+</body>

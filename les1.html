@@ -146,13 +146,8 @@
 
             }
 				function render() {
-				 /*if (way>0 && t%100 == 0)
-				 	way=1;
-				if (way<0 && t%100 == 0)
-				 	way=-1;*/
-
-
-						t++;
+				
+				t++;
 				var t1 = t /30	;
 				var st =Math.sin(t1)*3+12, cs = Math.cos(t1)*5+10, sgt = Math.sign(st);
 					//if (sgt>0 )
@@ -161,24 +156,11 @@
 				    Dots[i].position.y= Points[i].getComponent(1)*st*sgt;
  					Dots[i].position.z= Points[i].getComponent(2)*st*sgt;
 				}
-				//camera.position.z +=way; 
-				
-				                        	//sgeometry.scale(st, 0, 0); 
-				                        
-							    
-									  /*for ( var i = 0 ; i < Dots.length ; i++ ) {
-				                        var v0 = Do)ts[i].position;
-                        var v = displacement( v0.getComponent(0), v0.getComponent(1), v0.getComponent(2), t/30);
-                        Dots[i].position.x = v.getComponent(0) + v0.getComponent(0);
-                        Dots[i].position.y = v.getComponent(1) + v0.getComponent(1);
-                        Dots[i].position.z = v.getComponent(2) + v0.getComponent(2);
-                    }*/
-                Dots.verticesNeedUpdate = true;                    
-
+                Dots.verticesNeedUpdate = true;    
+				    
   				Stats.update();
 				renderer.render(scene, camera);
-					//t++;
-					
+									
 				}
 			}
 		function load3DSceneByCollada(loader, file_str){

@@ -11,62 +11,110 @@
 <script src="../libraries/three.js-r87/build/three.min.js"></script>
 <script>
 
-    var camera, scene, renderer, particles, star_geometry, star_materials = [], parameters, i, h, color, size;
-     scene = new THREE.Scene();
-     camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    camera.position.set (200, 200 , 200); //(20, 20 , 20);
-    camera.lookAt(new THREE.Vector3(0,0,0));
+    var camera, scene, renderer, particles, count_stars = 100, stars_geometry = [], stars_materials = [[]], parameters, i, h, color, size, camera_position, stars_position = [], single_stars_geometry, single_stars_materials = [], count_single_stars = 20000, start_time;
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
+    camera.position.set (0, 0 , 6000); //(20, 20 , 20);
+    /*stars_position = [new THREE.Vector3(-1600,500,3300),
+        new THREE.Vector3(1400,450,4100),
+        new THREE.Vector3(-1200,330,1600),
+        new THREE.Vector3(-300,200,2700),
+        new THREE.Vector3(-200,380,3900),
+        new THREE.Vector3(-100,400,4500),
+        new THREE.Vector3(0,620,3500),
+        new THREE.Vector3(100,560,3100),
+        new THREE.Vector3(200,600,4800),
+        new THREE.Vector3(300,700,4600) 
+        ];*/
+    var camera_look_at = new THREE.Vector3(0,100, 0);
 
-     renderer = new THREE.WebGLRenderer();
+    //camera.lookAt(camera_look_at);
+
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
-
-     star_geometry = new THREE.Geometry();
-    /*var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    var cube = new THREE.Mesh(geometry, material);*/
-
-    //Массив кубов
-    var n = 12, m = 3 , radius = [], start_radius = 18  , radius_step = 6, count_radiuss = 30;
-    for ( var i = 0; i < count_radiuss; i++ ) 
-        radius.push(start_radius+radius_step*i);
-    
-for ( var j = 0; j < m; j++ )
-    for ( var i = 0; i < count_radiuss; i++ ) {
+    single_stars_geometry = new THREE.Geometry();
+    for ( var i = 0; i < count_single_stars; i++ ) {
         var vertex = new THREE.Vector3();
-        vertex.x = Math.sin (2*Math.PI/n*i+2*Math.PI/10*(j+i))*radius[i%count_radiuss];
-        vertex.z = Math.cos (2*Math.PI/n*i+2*Math.PI/10*(j+i))*radius[i%count_radiuss];
-        vertex.y = 0;
-        star_geometry.vertices.push( vertex );
+        vertex.x = Math.random() * 5000 - 2500;
+        vertex.y = 1000;
+        vertex.z = Math.random()*10000 - 5000;
+        single_stars_geometry.vertices.push( vertex );
     }
 
+    for ( var i = 0; i < count_stars; i++ ) {
+        var x, y, z;
+        x = Math.random() * 3000 - 1500;
+        y = 600 + Math.random() * 400 ;
+        z = Math.random()*5000 ;
+        stars_position.push(new THREE.Vector3(x,y,z));
+        stars_materials.push([]);
+        stars_geometry.push(new THREE.Geometry())
+    }
+
+    var  sleeve = 6, radius = [], start_radius = 18  , radius_step = 6, count_radiuss = 30;
+    for ( var i = 0; i < count_radiuss; i++ ) 
+        radius.push(start_radius+radius_step*i);
+
+for ( var l = 0; l < count_stars; l++ ) 
+{
+
+    sleeve = l % 6;
+    start_radius= 18 + l % 6;
+    radius_step = 6 + l % 6;//Math.random()*6
+    count_radiuss = 30 + l % 6;
+
+    for ( var j = 0; j < sleeve; j++ )
+        for ( var i = 0; i < count_radiuss; i++ ) {
+            var vertex = new THREE.Vector3();
+            vertex.x = Math.sin (2*Math.PI/count_radiuss*i+Math.PI/sleeve/count_stars*(j+l))*(radius[i%count_radiuss]+j*radius_step); 
+            vertex.z = Math.cos (2*Math.PI/count_radiuss*i+Math.PI/sleeve/count_stars*(j+l))*(radius[i%count_radiuss]+j*radius_step);
+            vertex.y = 20;  
+            stars_geometry[l].vertices.push( vertex );
+        }
+}       
+
     parameters = [
-        [ [1, 1, 0.5], 6 ],
-        [ [0.95, 1, 0.5], 5 ],
-        [ [0.90, 1, 0.5], 4 ],
-        [ [0.85, 1, 0.5], 3 ],
-        [ [0.80, 1, 0.5], 2 ],
-        [ [0.75, 1, 0.5], 1 ]
+        [ [0.45, 1, 0.5], 6 ],
+        [ [0.4, 1, 0.5], 5 ],
+        [ [0.35, 1, 0.5], 4 ],
+        [ [0.3, 1, 0.5], 3 ],
+        [ [0.25, 1, 0.5], 2 ],
+        [ [0.2, 1, 0.5], 1 ]
     ];
+
+
+for ( var l = 0; l < count_stars; l++ )  
     for ( i = 0; i < parameters.length; i ++ ) {
         //var rnd = Math.random() * 6;//Math.ceil(Math.random() * 6);
         color = parameters[i][0];
         size  = parameters[i][1];
-        star_materials[i] = new THREE.PointsMaterial( { size: size } );
-        particles = new THREE.Points( star_geometry, star_materials[i] );/*
+        stars_materials[l][i] = new THREE.PointsMaterial( { size: size } );
+        particles = new THREE.Points( stars_geometry[l], stars_materials[l][i] );
+        particles.position.x += stars_position[l].getComponent(0);
+        particles.position.y += stars_position[l].getComponent(1);
+        particles.position.z += stars_position[l].getComponent(2);
+        
         particles.rotation.x = Math.random() * 6;
-        particles.rotation.y = Math.random() * 6;*/
-        //particles.rotation.z = Math.random() ;
+        particles.rotation.y = Math.random() * 6;
+        particles.rotation.z = Math.random() * 6;
         scene.add( particles );
+
     }
-    /*
-    for (var i=0; i<n; i++) {
-        cubes.push(new THREE.Mesh(geometry, material));
-        cubes[i].position.x = Math.sin (2*Math.PI/n*i)*radius[i%6]/2;
-        cubes[i].position.y = Math.cos (2*Math.PI/n*i)*radius[i%6]/2;
-        scene.add(cubes[i]);
-    }*/
-    //Длина окружности
+
+    for ( i = 0; i < parameters.length; i ++ ) {
+        //var rnd = Math.random() * 6;//Math.ceil(Math.random() * 6);
+        color = parameters[i][0];
+        size  = parameters[i][1];
+        stars_materials[l][i] = new THREE.PointsMaterial( { size: size } );
+        particles = new THREE.Points( single_stars_geometry, single_stars_materials[i] );
+       
+        //scene.add( particles );
+
+    }
+
+    start_time = Date.now();
+
     var s = 2*Math.PI /180/12, angle = 0;
 /*
     var animate = function () {
@@ -90,18 +138,27 @@ for ( var j = 0; j < m; j++ )
         //stats.update();
     }
     function render() {
-        var time = Date.now() * 0.00005;
+        var time = Date.now() * 0.000001;
         for ( i = 0; i < scene.children.length; i ++ ) {
             var object = scene.children[ i ];
             if ( object instanceof THREE.Points ) {
-                object.rotation.y = time * ( (i%3) == 0 ? i + 1 : - ( i + 1 ) );
+                object.rotation.y = time * (( i % 2) == 0 ? i : -(i) );
             }
         }
-        for ( i = 0; i < star_materials.length; i ++ ) {
-            color = parameters[i][0];
-            h = ( 360 * ( color[0] + time ) % 360 ) / 360;
-            star_materials[i].color.setHSL( h, color[1], color[2] );
+
+for ( var l = 0; l < count_stars; l++ )  
+        for ( i = 0; i < stars_materials[l].length; i ++ ) {
+            //color = parameters[i][0];
+            //h = ( 360 * ( color[0] + l*0.03 + time ) % 360 ) / 360;
+            stars_materials[l][i].color.setHex( 0x83aff7);
         }
+
+        camera_position = ( ( Date.now() - start_time ) * 0.03 ) % 6000;
+
+        camera.position.z = - camera_position + 6000;
+
+        //camera.lookAt(star_position);//camera_look_at
+
         renderer.render( scene, camera );
     }
 
