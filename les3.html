@@ -1,66 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Wave on cube side. 3 lesson Three.js</title>
+    <title>particle system</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
-        body { margin: 0; }
-        canvas { width: 100%; height: 100% }
+    body {
+        font-family: Monospace;
+        background-color: #f0f0f0;
+        margin: 0px;
+        overflow: hidden;
+    }
+    #info {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        padding: 5px;
+        font-family:Monospace;
+        font-size:13px;
+        text-align:center;
+        color: #ffffff;
+    }
+    a {
+        color: #ffffff;
+    }
     </style>
 </head>
+
 <body>
-<script src="../libraries/three.js-r87/build/three.min.js"></script>
 
-<script>
-    //<script src="../libraries/three.js-r87/src/helpers/AxisHelper.js">
-    var Scene = new THREE.Scene();
-    var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    Camera.position.set(40, 20, 20);
-    Camera.lookAt(new THREE.Vector3(0,0,0));
+    <div id="container"></div>
+    <div id="info"></div>
 
+    <script src="libs/three.js"></script>
+    <script src="libs/TrackballControls.js"></script>
+    <script src="libs/dat.gui.min.js"></script>
+    <script src="libs/stats.min.js"></script>
+    <script src="libs/GPUParticleSystem.js"></script>
 
-    var Renderer = new THREE.WebGLRenderer();
-    Renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( Renderer.domElement );
-
-    var Geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var Material = new THREE.MeshBasicMaterial( {vertexColors: THREE.FaceColors } );
-
-    //Массив кубов
-    var Cubes = [[]], n = 60, m = 40, k =0;
-
-    for (var i=0; i<n; i++){
-        Cubes.push([]);
-        for (var j=0; j<m; j++){
-            Cubes[i].push(new THREE.Mesh(Geometry, Material));
-            Cubes[i][j].position.x = -m/2 + j;
-            Cubes[i][j].position.z = -n/2 + i;
-            for (var j1=0; j1<6; j1++){
-                var color1 = new THREE.Color();
-                color1.setRGB(Math.random(), Math.random(),Math.random());
-                Cubes[i][j].geometry.faces[2*j1].color     = color1;
-                Cubes[i][j].geometry.faces[2*j1+1].color = color1 ;
+    <script>
+        var camera, tick = 0, rainbow = [[]], rainbow_size = 7,
+            scene, renderer, clock = new THREE.Clock(),
+            controls, container,
+            options, spawnerOptions, particleSystem;
+        var stats;
+        init();
+        animate();
+        function init() {
+            //
+            container = document.getElementById( 'container' );
+            camera = new THREE.PerspectiveCamera( 28, window.innerWidth / window.innerHeight, 1, 10000 );
+            camera.position.z = 100;
+            scene = new THREE.Scene();
+            for (var i = 0; i<4; i++)
+                rainbow.push([]);  
+            for (var i = 0; i<rainbow_size; i++)
+            {   
+                rainbow[0].push( new THREE.GPUParticleSystem( { maxParticles: 21000 } ));
+                var color = new THREE.Color();
+                color.setHSL(0.08*i, 1, 0.5);
+                if (i>3)                    
+                    color.setHSL(0.16*(i-1), 1, 0.5);
+                //var posR = 0.1+0.1*i;
+                //var purb = 0.1+0.1*i
+                //var timeSc = 0.3+0.1*i;
+                var index = 1+0.02*i;
+                scene.add( rainbow[0][i] );
+                var options = {
+                    position: new THREE.Vector3(),
+                    positionRandomness: .3,
+                    velocity: new THREE.Vector3(),
+                    velocityRandomness: .5,
+                    color: color,
+                    colorRandomness: .2,
+                    turbulence: 0.5,
+                    lifetime: 7,
+                    size: 5,
+                    sizeRandomness: 1
+                };
+                var spawnerOptions = {
+                    spawnRate:  5000,
+                    horizontalSpeed: 1.5,
+                    verticalSpeed: 1.33,
+                    timeScale: 0.1
+                };
+                var tailScale = {
+                    a: 20*index,
+                    b: 10*index,
+                    c: 5*index
+                };
+                rainbow[1].push(options);
+                rainbow[2].push(spawnerOptions);
+                rainbow[3].push(tailScale);
             }
-
-            Scene.add(Cubes[i][j]);
+            //
+            stats = new Stats();
+            container.appendChild( stats.dom );
+            //
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            container.appendChild( renderer.domElement );
+            //
+            controls = new THREE.TrackballControls( camera, renderer.domElement );
+            controls.rotateSpeed = 5.0;
+            controls.zoomSpeed = 2.2;
+            controls.panSpeed = 1;
+            controls.dynamicDampingFactor = 0.3;
+            window.addEventListener( 'resize', onWindowResize, false );
         }
-    }
-
-    //Длина окружности
-    //var l = Cubes[cubes.length-1].position.x - Cubes[0].position.x, k = 0;
-
-    var animate = function () {
-        requestAnimationFrame( animate );
-        k+=0.02;
-        //Анимация волн
-        for (var i=0; i<n; i++)
-            for (var j=0; j<m; j++){
-                Cubes[i][j].scale.y = 4+Math.sin (360/Cubes.length*i+k);
-                Cubes[i][j].position.y = Math.sin (360/Cubes.length*i+k)/2;
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+        }
+        function animate() {
+            requestAnimationFrame( animate );
+            controls.update();      
+            var delta = clock.getDelta() * rainbow[2][0].timeScale;
+            for (var i = 0; i<rainbow_size; i++)
+            {    
+                tick += delta;
+                if ( tick < 0 ) tick = 0;  
+                rainbow[0][i].update( tick );
+                if ( delta > 0 ) {
+                    rainbow[1][i].position.x = Math.sin( tick * rainbow[2][i].horizontalSpeed ) * rainbow[3][i].a;
+                    rainbow[1][i].position.y = Math.sin( tick * rainbow[2][i].verticalSpeed ) * rainbow[3][i].b;
+                    rainbow[1][i].position.z = Math.sin( tick * rainbow[2][i].horizontalSpeed + rainbow[2][i].verticalSpeed ) * rainbow[3][i].c;
+                    for ( var x = 0; x < rainbow[2][i].spawnRate * delta; x++ ) {
+                        rainbow[0][i].spawnParticle(  rainbow[1][i] );
+                    }
+                }
             }
-
-        Renderer.render(Scene, Camera);
-    };
-
-    animate();
-</script>
+            render();
+            stats.update();
+        }
+        function render() {
+            renderer.render( scene, camera );
+        }
+    </script>
 </body>
+
+</html>

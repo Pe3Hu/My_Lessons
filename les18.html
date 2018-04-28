@@ -8,27 +8,30 @@
     </style>
 </head>
 <body>
+<div id="info"></div>
+<div id="container"></div>
 <script src="libs/three.min.js"></script>
 <script src="libs/FlyControls.js"></script>		
 <script src="libs/OrbitControls.js"></script>
 <script src="libs/perlin.js"></script>
 <script src="libs/noise.js"></script>
+<script src="libs/stats.min.js"></script>
+
 
 <script>
-	var Lines = [], n = 32, m = 32, k = 0;
+	var Lines = [], array_faces = [], n = 32, m = 32, k = 0;
 	var pixelsX = 50, pixelsY = 50;
-	var pixelSizeX = 10, pixelSizeY = 10;
 	var perlinCycle          = 0;
 	var perlinCycleIncrement = 0.075;
 	var ribbons = [];
 	var numRibbons = 1;
 	var ribbonYDeviation = 200;
 	var lastUpdate = 0;
-	var w = window.innerWidth;
+	var w = window.innerWidth;	
 	var h =  window.innerHeigh;
     var Scene = new THREE.Scene();
-    var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    Camera.position.set(60, 60, 160);
+    var Camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
+    Camera.position.set(0, -200, 200);
     Camera.lookAt(new THREE.Vector3(0,0,0));
 
     Controls = new THREE.OrbitControls( Camera );
@@ -44,65 +47,91 @@
     var Renderer = new THREE.WebGLRenderer();
     Renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( Renderer.domElement );
-
-	/*for (var i=0; i<n; i++){
-	    var material = new THREE.LineBasicMaterial({color: 0x0000ff});
-	    var geometry = new THREE.Geometry();
-	    for (var j=0; j<m; j++)
-	    {
-			var z = noise.perlin3(0.5, 0.5, perlinCycle);
-			//var z = Math.random(0,10);
-			
-			z *= 10;
-			geometry.vertices.push(new THREE.Vector3( -m/2 + j, z, -n/2 + i ));
-  			perlinCycle += perlinCycleIncrement;
-	    }
-	    Lines.push(new THREE.Line( geometry, material ));
-	    Scene.add( Lines[i] );
-	}*/
-/*
-	for (var i=0; i<n; i++) {
-	    var material = new THREE.LineBasicMaterial({color: 0x0000ff});
-	    var geometry = new THREE.Geometry();
-     	for (var j=0; j<m; j++) {
-	      var noiseValue = noise.perlin3(i * 0.1, j * 0.1, perlinCycle);
-	      noiseValue = Math.floor(scaleNoise(noiseValue) * 10);
-		  geometry.vertices.push(new THREE.Vector3( -m/2 + j, noiseValue, -n/2 + i ));
-	    }
-
-	    Lines.push(new THREE.Line( geometry, material ));
-	    Scene.add( Lines[i] );
-	  }*/
+	var container = document.getElementById( 'container' );
+	container.appendChild( Renderer.domElement );
+	var Stats = new Stats();
 
 	var textureLoader = new THREE.TextureLoader();
-	var texture1 = textureLoader.load( "images/crate.gif" );
-
-	/*var maxAnisotropy = Renderer.capabilities.getMaxAnisotropy();
-	texture1.anisotropy = maxAnisotropy;
-	texture1.wrapS = texture1.wrapT = THREE.RepeatWrapping;
-	texture1.repeat.set( 512, 512 );*/
-	var geometry = new THREE.PlaneBufferGeometry( 256, 256, 30, 30 );
-	var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide, map: texture1} );
-	var plane = new THREE.Mesh( geometry, material );
-	plane.rotateX(Math.PI/2);
+	var texture = textureLoader.load( "images/crate.gif" );
+	var plane_geometry = new THREE.PlaneBufferGeometry( 256, 256, 30, 30 );
+	var plane_material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide, map: texture} );
+	var plane = new THREE.Mesh( plane_geometry, plane_material );
+	//plane.rotateX(Math.PI/2);
+	plane.position.z -= 30;
 	Scene.add( plane );
-	var array = plane.geometry.attributes.position.array;
+	var array = plane.geometry.attributes.position.array;	
 
-	 for (var i=0; i<n; i++) {
+	var faces_geometry = new THREE.Geometry();
+	var faces_material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors, side: THREE.DoubleSide } );
+
+	for (var i=0; i<n; i++) {
      	for (var j=0; j<m; j++) {
 			var noiseValue = noise.perlin3(i * 0.1, j * 0.1, perlinCycle);
-			noiseValue = Math.floor(scaleNoise(noiseValue) * 50);
+			noiseValue = Math.floor(scaleNoise(noiseValue) * 40);
 			var index = (i*n+j)*3+2;
 			plane.geometry.attributes.position.array[index] = noiseValue;
 	    }
-	    //perlinCycle++;
-	  }
+	}
 
-    var animate = function () {
+	var points = new THREE.Points( plane.geometry,  new THREE.PointsMaterial( { color: 0x00A86B } ) )
 
+	//points.rotateX(Math.PI/2);
+	//points.position.y 	+= 50;
+	vertex_array = points.geometry.attributes.position.array;
+
+	Scene.add( points );
+	var color1 = new THREE.Color();	
+	var color2 = new THREE.Color();
+	var h1, h2, s1 = 1, s2 = 1, l1 = 0.5, l2 = 0.5, hue1, hue2;
+	var index = 3*(n-1); 
+
+	for (var j=0; j<(n-2); j++){
+		for (var i=0; i<(n-2)*3; i+=3)
+			{
+				var a = new THREE.Vector3( vertex_array[i+j*index], vertex_array[i+1+j*index], vertex_array[i+2+j*index] );
+				var b = new THREE.Vector3( vertex_array[i+3+j*index], vertex_array[i+4+j*index], vertex_array[i+5+j*index]);
+				var c = new THREE.Vector3( vertex_array[i+(j+1)*index], vertex_array[i+1+(j+1)*index], vertex_array[i+2+(j+1)*index] );			
+				var d = new THREE.Vector3( vertex_array[i+3+(j+1)*index], vertex_array[i+4+(j+1)*index], vertex_array[i+5+(j+1)*index] );
+				hue1 = (a.z+b.z+c.z)/120;
+				hue2 = (d.z+b.z+c.z)/120;
+				l1 = 0.5 + Math.random() *0.2;
+				l2 = 0.5 - Math.random() *0.2;
+
+				color1.setHSL( hue1, s1, l1 );
+				color2.setHSL( hue2, s2, l2 );
+
+				var face1 = new THREE.Face3(
+					faces_geometry.vertices.push( a ) -1 ,
+					faces_geometry.vertices.push( b ) -1 ,
+					faces_geometry.vertices.push( c ) -1 ,
+					null,
+					color1
+				);
+
+				var face2 = new THREE.Face3(
+					faces_geometry.vertices.push( b ) -1 ,
+					faces_geometry.vertices.push( c ) -1 ,
+					faces_geometry.vertices.push( d ) -1 ,
+					null,
+					color2
+				);
+
+				faces_geometry.faces.push( face2 );
+				faces_geometry.faces.push( face1 );
+
+			}
+		}
+
+	faces_geometry.computeFaceNormals();
+	faces_geometry.computeVertexNormals();
+	Scene.add( new THREE.Mesh( faces_geometry, faces_material ) );
+
+    var animate = function () { 		
 		Controls.update();
+		Stats.update();
         requestAnimationFrame( animate );      
         Renderer.render(Scene, Camera);
+    	//perlinCycle += perlinCycleIncrement*5000;
     };
 
     animate();

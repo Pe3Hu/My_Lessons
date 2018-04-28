@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>les20</title>
+        <meta charset="utf-8">
+        <style>
+            html, body {
+                color: #808080;
+                font-family: Monospace;
+                font-size: 13px;
+                text-align: center;
+                background-color: #fff;
+                margin: 0px;
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+            }
+            canvas {
+                position: relative;
+                width: 110px;
+                height: 210px;
+                border: 1px solid hsl(226, 100%, 50%);
+                float: left;
+            }
+            #info {
+                position: absolute;
+                top: 0px; width: 100%;
+                padding: 5px;
+            }
+            #centerer {
+                display: table;
+                width: 100%;
+                height: 100%;
+            }
+            #centerer-cell {
+                display: table-cell;
+                vertical-align: middle;
+            }
+            #container {
+                margin-left: auto;
+                margin-right: auto;
+                width: 604px;  /* 300*2 + border; */
+            }
+            #container div {
+                float: left;
+            }
+            @font-face {
+                font-family: 'Windsong';
+                src:    fonts/Windsong.ttf);
+            }
+           
+            a {
+                color: #0080ff;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="libs/three.min.js"></script>
+
+        <script src="libs/Detector.js"></script>
+
+        <script>
+            if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+            var views = [];
+            var scene, renderer;
+            var mouseX = 0, mouseY = 0;
+            var windowHalfX = window.innerWidth / 2;
+            var windowHalfY = window.innerHeight / 2;
+            var k = 0;
+            var note = [ "id", "front", "front value", "back", "back value"];
+
+            var manual = {
+                paths    : [ "unity", "creation", "strife", "destruction" ],                     // UCSD    0 - accord 2 - discord
+                elements : [ "aqua", "earth", "wind", "flame" ],                                 // AEWF    0 - water 2 - fog 3 - fire 
+                sins     : [ "pride", "avarice", "gluttony", "sloth", "lust", "envy", "wrath" ], // PAGSLEW
+                styles   : [ "strategy", "defense", "tactics", "attack" ]                        // SDTA    3 - offence 
+            };
+            var names = [ "Amel", "Bynq", "Chiu", "Drox"];
+            var tags = [ "paths", "elements", "sins", "styles"];
+
+            var data = []
+            /*var loader = new THREE.FontLoader();
+            loader.load( 'fonts/Lobster 1.3_Regular.json', function ( font ) {
+                init( font );
+                animate();
+            } );*/
+            init();
+            animate();  
+            //
+            //
+            function init(  ) {
+                var w = 110, h = 210; //h = 140
+                //
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color( 0xffffff );
+                var light = new THREE.DirectionalLight( 0xffffff );
+                light.position.set( 0, 0, 1 ).normalize();
+                scene.add( light );
+                // shadow
+
+                var container = document.getElementById(container);
+                var count = 10;
+
+                for (var i=0; i<count; i++){
+                    rand = [];
+                    var k = 0;
+                    var range = 4, curr;
+                    for (var j=0; j<2; j++){
+                        var randA = Math.floor(Math.random()*4);
+                        var randB = Math.floor(Math.random()*4);
+                        if ( randA == 3 )
+                            randB = Math.floor(Math.random()*7);
+
+                        rand.push( {
+                            side: randA,
+                            avatar: randB
+                        });
+                    }
+
+
+                    for (var key in manual) { 
+
+
+                        k++;
+                    }
+                    var obj = {
+                        id: i,
+                        fP: names[Math.floor(rand[0].avatar/2)],
+                        rfP: Math.floor(rand[0].avatar/2),
+                        f: tags[rand[0].side],
+                        rf: rand[0].side,
+                        fA: manual[tags[rand[0].side]][rand[0].avatar],
+                        rfA: rand[0].avatar,
+                        //fV: 70,
+                        bP: names[Math.floor(rand[1].avatar/2)],
+                        rbP: Math.floor(rand[1].avatar/2),
+                        b: tags[rand[1].side],
+                        rb: rand[1].side,
+                        bA: manual[tags[rand[1].side]][rand[1].avatar],
+                        rbA: rand[1].avatar,//,
+                        //bV: 80
+                    }
+                    data.push(obj)
+                }
+
+                for (index = 1; index<count; index++)
+                {
+                    var canvas = document.createElement( 'canvas' );
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.id="canvas"+index.toString();
+                    canvas.className = "canvas";
+                    var context = canvas.getContext( '2d' );
+                    context.font = "15px Arial";
+                    context.fillStyle = "#000000";//"hsl(46, 100%, 50%)";
+                    var obj = data[index-1];
+                    var k = 0; 
+                    var strL = 12;
+                    for (var key in obj) {                        
+                        var str = key + ":";
+                        k++; 
+                        context.fillText(str, 0, 15*(k));   
+                        str = obj[key];
+                        context.fillText(str, 30, 15*(k));//note -80 key - 25                       
+                    }
+
+
+                     /*
+                    context.fillText("id "+obj.id.toString(), 0, 15);
+                    context.fillText("name1 "+obj.f, 0, 30);
+                    context.fillText("value1 "+obj.fV.toString(), 0, 45);
+                    context.fillText("name2 "+obj.b, 0, 60);                    
+                    context.fillText("value2 "+obj.bV.toString(), 0, 75);*/
+                    document.body.appendChild(canvas);
+                }               
+
+                renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( w, h );
+                document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            }
+            function onDocumentMouseMove( event ) {
+                mouseX = event.clientX - windowHalfX;
+                mouseY = event.clientY - windowHalfY;
+            }
+            function animate() {
+                /*k++;
+                for (index = 1; index<5; index++)
+                {   
+                    var id = "canvas"+index.toString();
+                    var canvas = document.getElementById(id);
+                    var context = canvas.getContext( '2d' );
+
+                    context.clearRect(0,0,canvas.width,canvas.height);
+                    context.font = "Bold 20px Arial";
+                    context.fillStyle = "rgba(0,0,0,0.95)";
+                    context.fillText((index+k*index).toString(), 0, 20);
+                    document.body.appendChild(canvas);
+
+                }            */
+                requestAnimationFrame( animate );
+            }
+        </script>
+
+    </body>
+</html>
